@@ -1,0 +1,19 @@
+{
+ "app": "LC Tracker King",
+ "items": [
+  {
+   "id": "mwvuzw171gba4",
+   "url": "https://medebugger.mobileye.com/?version=v2&eventlist=%7B%22id%22%3A%22071420b6-ef16-486c-b2c3-3e7b37ff1fa7%22%2C%22name%22%3A%22triage_med_6_triages_20261116_091917_events%22%7D&sources=%5B%7B%22url%22%3A%22c71c5224-10cf-4fa6-9ae1-54d91e033434%22%2C%22type%22%3A%22LocationList%22%2C%22name%22%3A%22triage_med_6_triages_20261116_091917_locations%22%7D%5D&quick_start=false&layout=5325cc09-274d-4c8d-b425-4173b100841d&layout_name=current&location_index=1&frame=30123",
+   "comment": "Map- false block lane",
+   "analyzed": true,
+   "evidence": false,
+   "confidence": "low",
+   "added": 1795595159275,
+   "approved": false,
+   "approvedAt": 0,
+   "updated": 1795597824133,
+   "together": false,
+   "togetherAt": 0
+  }
+ ]
+}
