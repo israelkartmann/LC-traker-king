@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LC Tracker King</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='39' r='22' fill='%238b5cf6' stroke='%233b1f8f' stroke-width='3'/%3E%3Cpath d='M12 22 L16 4 L25 14 L32 2 L39 14 L48 4 L52 22 Z' fill='%23facc15' stroke='%23a16207' stroke-width='2.5' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='9' r='3' fill='%23ef4444'/%3E%3Crect x='14' y='29' width='15' height='9' rx='3' fill='%23111'/%3E%3Crect x='35' y='29' width='15' height='9' rx='3' fill='%23111'/%3E%3Crect x='28' y='31' width='8' height='3' fill='%23111'/%3E%3Cpath d='M20 46 Q32 60 44 46 Z' fill='%23fff' stroke='%233b1f8f' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpath d='M29 52 Q32 57 35 52' fill='%23f472b6'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5f7; --card:#fff; --text:#1d2330; --muted:#6b7280; --line:#e3e6eb;
+  --accent:#4f46e5; --accent-soft:#eef0ff;
+  --green:#15803d; --green-soft:#dcfce7; --red:#b91c1c; --red-soft:#fee2e2;
+  --amber:#b45309; --amber-soft:#fef3c7; --gray-soft:#f1f2f4;
+  --teams:#5b5fc7;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14161b; --card:#1d2027; --text:#e6e8ec; --muted:#9aa1ad; --line:#2d313a;
+    --accent:#8b8cf6; --accent-soft:#272a45;
+    --green:#4ade80; --green-soft:#16301f; --red:#f87171; --red-soft:#3a1c1c;
+    --amber:#fbbf24; --amber-soft:#3a2e12; --gray-soft:#262a32;
+    --teams:#8b8ff0;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 "Segoe UI",system-ui,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0;margin-right:auto}
+main{max-width:1400px;margin:0 auto;padding:18px 20px 60px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:7px;padding:5px 10px}
+button:hover{border-color:var(--accent)}
+.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.teams{background:var(--teams);border-color:var(--teams);color:#fff}
+.small{font-size:12px;padding:3px 8px}
+.addbox{background:var(--card);border:2px dashed var(--line);border-radius:12px;padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px;transition:.15s}
+.addbox.drag{border-color:var(--accent);background:var(--accent-soft)}
+.addbox input{flex:1;min-width:260px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+.hint{color:var(--muted);font-size:12px;width:100%}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:22px;overflow:hidden}
+section h2{font-size:15px;margin:0;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.count{background:var(--accent-soft);color:var(--accent);border-radius:20px;padding:1px 9px;font-size:12px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;background:var(--gray-soft);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.num{color:var(--muted);width:30px}
+.linkcell{min-width:220px;max-width:380px}
+.note{display:inline-block;background:var(--amber-soft);color:var(--amber);border-radius:6px;padding:2px 7px;font-size:12px;margin-bottom:4px;max-width:100%;word-break:break-word}
+.linkcell a{color:var(--accent);word-break:break-all;text-decoration:none}
+.linkcell a:hover{text-decoration:underline}
+.date{color:var(--muted);font-size:11px;margin-top:3px}
+textarea{width:100%;min-width:170px;min-height:38px;resize:vertical;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);font:inherit;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;white-space:nowrap}
+.seg button{border:none;border-radius:0;padding:5px 9px;font-size:12px;background:transparent}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on.yes{background:var(--green-soft);color:var(--green);font-weight:600}
+.seg button.on.no{background:var(--red-soft);color:var(--red);font-weight:600}
+.seg button.on.high{background:var(--green-soft);color:var(--green);font-weight:600}
+.seg button.on.medium{background:var(--amber-soft);color:var(--amber);font-weight:600}
+.seg button.on.low{background:var(--red-soft);color:var(--red);font-weight:600}
+.actions{display:flex;gap:6px;flex-wrap:wrap;min-width:200px}
+.approve{background:var(--green);border-color:var(--green);color:#fff}
+.del{color:var(--red)}
+.empty{padding:26px;text-align:center;color:var(--muted)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:9px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;max-width:90vw;text-align:center;z-index:20}
+.toast.show{opacity:1}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);max-width:560px;width:92vw;padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);font:inherit;margin:8px 0}
+dialog ol{padding-left:20px;color:var(--muted)}
+.filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;font-weight:400}
+.filter select,.filter input{font:inherit;font-size:12px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text)}
+.pill{border-radius:20px;font-size:12px;padding:4px 11px;border:1px solid transparent}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.off{background:var(--amber-soft);color:var(--amber)}
+.banner{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.banner div{min-width:0}
+.bannerBtns{display:flex;gap:8px;flex-wrap:wrap}
+.banner .whenReconnect{display:none}
+.banner.reconnect .whenReconnect{display:block}
+.banner.reconnect button.whenReconnect{display:inline-block}
+.banner.reconnect .whenNew{display:none}
+[hidden]{display:none!important}
+@media (max-width:700px){header,main{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>👑 LC Tracker King</h1>
+  <button id="syncPill" class="pill off">● Not shared — only on this computer</button>
+  <button id="btnChangeFile" title="Use a different shared file">🔁 Shared file</button>
+  <button id="btnExport" title="Download a file you can open in Excel">⬇ Export to Excel</button>
+  <button id="btnBackup" title="Save all data to a backup file">💾 Backup</button>
+  <button id="btnRestore" title="Load data from a backup file">📂 Restore</button>
+  <input type="file" id="fileRestore" accept=".json" hidden>
+</header>
+
+<main>
+  <div class="banner" id="banner">
+    <div class="whenNew">
+      <b>Share this list with others</b>
+      <div id="bannerText">Pick the shared data file in your OneDrive / Teams folder. Everyone who uses the same file sees the same links. Changes arrive within about a minute.</div>
+    </div>
+    <div class="whenReconnect">
+      <b>Click anywhere to connect to the shared list</b>
+      <div>Chrome will ask to let this page edit <b id="reconnectName"></b>. Choose <b>Allow on every visit</b> so it doesn't ask again.</div>
+    </div>
+    <div class="bannerBtns">
+      <button class="primary whenReconnect" id="btnReconnect">🔓 Connect</button>
+      <button class="whenReconnect" id="btnOtherFile">Use a different file</button>
+      <button class="primary whenNew" id="btnOpenShared">📂 Open shared file</button>
+      <button class="whenNew" id="btnCreateShared">✚ Create new shared file</button>
+    </div>
+  </div>
+
+  <div class="addbox" id="addbox">
+    <input id="newLink" placeholder="Paste a link here (or several) and press Enter…">
+    <button class="primary" id="btnAdd">+ Add link</button>
+  </div>
+
+  <section>
+    <h2>New links <span class="count" id="count1">0</span>
+      <span class="filter">
+        <select id="f1Analyzed"><option value="">All</option><option value="yes">Analyzed</option><option value="no">Not analyzed</option></select>
+        <select id="f1Evidence"><option value="">Any evidence</option><option value="yes">Evidence</option><option value="no">No evidence</option></select>
+        <input id="f1Search" placeholder="Search…">
+      </span>
+    </h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Link</th><th>Comment</th><th>Analysis</th><th>Evidence</th><th>Confidence</th><th>Actions</th></tr></thead>
+      <tbody id="tbody1"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Approved <span class="count" id="count2">0</span>
+      <span class="filter"><input id="f2Search" placeholder="Search…"></span>
+    </h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Link</th><th>Comment</th><th>Analysis</th><th>Evidence</th><th>Confidence</th><th>Actions</th></tr></thead>
+      <tbody id="tbody2"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Need to go over together <span class="count" id="count3">0</span>
+      <span class="filter"><input id="f3Search" placeholder="Search…"></span>
+    </h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Link</th><th>Comment</th><th>Analysis</th><th>Evidence</th><th>Confidence</th><th>Actions</th></tr></thead>
+      <tbody id="tbody3"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var KEY = 'lcLinkTracker.v1';
+  var state = { items: [] };
+
+  // ---------- local storage (a copy on this computer) ----------
+  function load(){
+    try { var raw = localStorage.getItem(KEY); if (raw) { var s = JSON.parse(raw); if (s && Array.isArray(s.items)) state = { items: s.items }; } } catch(e) {}
+  }
+  function saveLocal(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {}
+  }
+  // mark an item as changed now, save locally and send it to the shared file
+  function save(it){
+    if (it) it.updated = Date.now();
+    saveLocal();
+    scheduleSync();
+  }
+  function live(){ return state.items.filter(function(i){ return !i.deleted; }); }
+  function stamp(it){ return it.updated || it.added || 0; }
+
+  // ---------- shared file (in a OneDrive / Teams folder) ----------
+  var fileHandle = null, busy = false, again = false, syncTimer = null, lastSync = 0, syncError = '';
+
+  function idb(mode, fn){
+    return new Promise(function(res, rej){
+      setTimeout(function(){ rej(new Error('IndexedDB timeout')); }, 3000);
+      var rq = indexedDB.open('lcTrackerKing', 1);
+      rq.onupgradeneeded = function(){ rq.result.createObjectStore('kv'); };
+      rq.onerror = function(){ rej(rq.error); };
+      rq.onsuccess = function(){
+        var tx = rq.result.transaction('kv', mode), st = tx.objectStore('kv'), r = fn(st);
+        tx.oncomplete = function(){ res(r && r.result); };
+        tx.onerror = function(){ rej(tx.error); };
+      };
+    });
+  }
+  function rememberHandle(h){ return idb('readwrite', function(st){ return h ? st.put(h, 'handle') : st.delete('handle'); }).catch(function(){}); }
+  function savedHandle(){ return idb('readonly', function(st){ return st.get('handle'); }).catch(function(){ return null; }); }
+
+  // newest change of each link wins; deleted links stay as hidden markers for 60 days
+  function merge(remoteItems, localItems){
+    var byId = {}, out = [];
+    localItems.forEach(function(it){ byId[it.id] = it; out.push(it); });
+    remoteItems.forEach(function(r){
+      if (!r || !r.id) return;
+      var l = byId[r.id];
+      if (!l) { byId[r.id] = r; out.push(r); }
+      else if (stamp(r) > stamp(l)) { Object.keys(r).forEach(function(k){ l[k] = r[k]; }); }
+    });
+    var cutoff = Date.now() - 60*24*3600*1000;
+    out = out.filter(function(it){ return !(it.deleted && stamp(it) < cutoff); });
+    out.sort(function(a,b){ return (a.added||0) - (b.added||0) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+    // the same link added by both people at the same time: keep the first one
+    var seen = {};
+    return out.filter(function(it){ if (it.deleted) return true; if (seen[it.url]) return false; seen[it.url] = 1; return true; });
+  }
+
+  function scheduleSync(){ clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 700); }
+
+  async function syncNow(){
+    if (!fileHandle) return;
+    if (busy) { again = true; return; }
+    busy = true;
+    try {
+      var text = await (await fileHandle.getFile()).text();
+      var remote = [];
+      if (text.trim()) { var parsed = JSON.parse(text); remote = Array.isArray(parsed.items) ? parsed.items : []; }
+      var before = JSON.stringify(state.items);
+      var merged = merge(remote, state.items);
+      var out = JSON.stringify({ app: 'LC Tracker King', items: merged }, null, 1);
+      if (out !== text) { var w = await fileHandle.createWritable(); await w.write(out); await w.close(); }
+      state.items = merged; saveLocal();
+      if (JSON.stringify(merged) !== before) render();
+      lastSync = Date.now(); syncError = '';
+    } catch(e) {
+      syncError = (e && e.name === 'NotAllowedError') ? 'permission' : (e && e.name === 'SyntaxError' ? 'The shared file is damaged or still syncing' : ((e && e.message) || 'Could not reach the shared file'));
+      if (syncError === 'permission') fileHandle = null;
+    }
+    busy = false;
+    showSync();
+    if (again) { again = false; syncNow(); }
+  }
+
+  function showSync(){
+    var pill = $('syncPill'), banner = $('banner');
+    if (fileHandle && !syncError) {
+      pill.className = 'pill ok'; pill.textContent = '● Shared · ' + fileHandle.name + (lastSync ? ' · updated ' + new Date(lastSync).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '');
+      banner.hidden = true;
+    } else if (fileHandle && syncError) {
+      pill.className = 'pill bad'; pill.textContent = '● Shared file problem — retrying';
+      pill.title = syncError; banner.hidden = true;
+    } else if (pendingHandle) {
+      pill.className = 'pill off'; pill.textContent = '🔓 Click to connect to the shared list';
+      banner.hidden = false; banner.classList.add('reconnect');
+    } else {
+      pill.className = 'pill off'; pill.textContent = '● Not shared — only on this computer';
+      banner.hidden = false; banner.classList.remove('reconnect');
+    }
+    if (fileHandle) banner.classList.remove('reconnect');
+  }
+
+  async function useHandle(h, writeLocalFirst){
+    fileHandle = h; syncError = '';
+    await rememberHandle(h);
+    if (writeLocalFirst) { var w = await h.createWritable(); await w.write(JSON.stringify({ app: 'LC Tracker King', items: state.items }, null, 1)); await w.close(); }
+    await syncNow();
+    if (!syncError) toast('✔ Connected to the shared list');
+  }
+
+  async function connectSaved(fromClick){
+    var h = await savedHandle();
+    if (!h) return false;
+    var p = await h.queryPermission({ mode: 'readwrite' });
+    if (p !== 'granted' && fromClick) p = await h.requestPermission({ mode: 'readwrite' });
+    if (p === 'granted') { pendingHandle = null; await useHandle(h, false); return true; }
+    pendingHandle = h; $('reconnectName').textContent = h.name; showSync();
+    return false;
+  }
+  var pendingHandle = null;
+  // Chrome only lets the page ask for the file after a click, so the first click anywhere reconnects
+  document.addEventListener('pointerdown', function(e){
+    if (!pendingHandle || fileHandle) return;
+    if (e.target && e.target.closest && e.target.closest('#btnOpenShared, #btnCreateShared, #btnOtherFile')) return;
+    if (connecting) return;
+    connecting = true;
+    connectSaved(true).catch(function(err){ toast('✖ ' + err.message, 5000); }).then(function(){ connecting = false; });
+  }, true);
+  var connecting = false;
+
+  var JSON_TYPES = [{ description: 'LC Tracker King data', accept: { 'application/json': ['.json'] } }];
+  async function openShared(){
+    try { var hs = await window.showOpenFilePicker({ types: JSON_TYPES, multiple: false }); await useHandle(hs[0], false); }
+    catch(e) { if (e.name !== 'AbortError') toast('✖ Could not open that file: ' + e.message, 5000); }
+  }
+  async function createShared(){
+    try { var h = await window.showSaveFilePicker({ suggestedName: 'LC-Tracker-King-data.json', types: JSON_TYPES }); await useHandle(h, true); }
+    catch(e) { if (e.name !== 'AbortError') toast('✖ Could not create the file: ' + e.message, 5000); }
+  }
+
+  // ---------- helpers ----------
+  function $(id){ return document.getElementById(id); }
+  function el(tag, attrs, kids){
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'class') e.className = attrs[k];
+      else if (k.slice(0,2) === 'on') e.addEventListener(k.slice(2), attrs[k]);
+      else e.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function(c){ if (c) e.appendChild(c); });
+    return e;
+  }
+  var toastTimer;
+  function toast(msg, ms){
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms || 2600);
+  }
+  function fmtDate(ts){ if (!ts) return ''; var d = new Date(ts); return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function find(id){ for (var i=0;i<state.items.length;i++) if (state.items[i].id === id) return state.items[i]; return null; }
+
+  function extractLinks(text){
+    if (!text) return [];
+    var m = text.match(/https?:\/\/[^\s<>"'`]+/gi) || [];
+    var out = [];
+    m.forEach(function(u){
+      u = u.replace(/[),.;!?\]]+$/, '');
+      if (out.indexOf(u) < 0) out.push(u);
+    });
+    // a bare domain like "www.site.com/x"
+    if (!out.length) {
+      var w = text.match(/\bwww\.[^\s<>"']+/gi) || [];
+      w.forEach(function(u){ u = 'https://' + u.replace(/[),.;!?\]]+$/, ''); if (out.indexOf(u) < 0) out.push(u); });
+    }
+    return out;
+  }
+
+  function addLinks(text){
+    var links = extractLinks(text);
+    if (!links.length) { toast('No link found in what you pasted'); return 0; }
+    var added = 0, dup = 0;
+    links.forEach(function(u){
+      var exists = live().some(function(it){ return it.url === u; });
+      if (exists) { dup++; return; }
+      var now = Date.now();
+      state.items.push({ id: uid(), url: u, comment: '', analyzed: false, evidence: false, confidence: '', added: now, updated: now, approved: false, approvedAt: 0, together: false, togetherAt: 0 });
+      added++;
+    });
+    save(); render();
+    toast(added ? ('✔ Added ' + added + ' link' + (added>1?'s':'') + (dup ? ' (' + dup + ' already in the list)' : '')) : 'That link is already in the list');
+    return added;
+  }
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  function where(it){ return it.approved ? 'approved' : (it.together ? 'together' : 'new'); }
+
+  function copyPlain(text){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function(){ legacyCopy(text); });
+    }
+    legacyCopy(text); return Promise.resolve();
+  }
+  function legacyCopy(text){
+    var ta = el('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} ta.remove();
+  }
+
+  // ---------- render ----------
+  function seg(options, value, onPick){
+    var wrap = el('div', {'class':'seg'});
+    options.forEach(function(o){
+      wrap.appendChild(el('button', {
+        'class': o.cls + (value === o.val ? ' on' : ''),
+        text: o.label,
+        onclick: function(){ onPick(o.val); }
+      }));
+    });
+    return wrap;
+  }
+
+  function linkCell(it, showNote){
+    var a = el('a', {href: it.url, target: '_blank', rel: 'noopener', text: it.url});
+    a.title = (it.comment ? '💬 ' + it.comment + '\n\n' : '') + it.url;
+    var kids = [];
+    if (showNote && it.comment) kids.push(el('div', {}, [el('span', {'class':'note', text: '💬 ' + it.comment})]));
+    kids.push(a);
+    var dateTxt = 'Added ' + fmtDate(it.added) + (it.together && it.togetherAt ? ' · To go over together ' + fmtDate(it.togetherAt) : '') + (it.approvedAt ? ' · Approved ' + fmtDate(it.approvedAt) : '');
+    kids.push(el('div', {'class':'date', text: dateTxt}));
+    return el('td', {'class':'linkcell'}, kids);
+  }
+
+  function row(it, n, kind){
+    function upd(field){ return function(v){ it[field] = v; save(it); render(); }; }
+    var ta = el('textarea', {placeholder: 'Write a few words…'});
+    ta.value = it.comment || '';
+    ta.addEventListener('input', function(){ it.comment = ta.value; save(it); var note = tr.querySelector('.note'); if (note) note.textContent = '💬 ' + ta.value; });
+    ta.addEventListener('change', function(){ render(); });
+
+    var actions = [];
+    if (kind !== 'approved') {
+      actions.push(el('button', {'class':'approve small', text:'✔ Approve', title:'Move to Approved', onclick: function(){
+        it.approved = true; it.together = false; it.approvedAt = Date.now(); save(it); render(); toast('Moved to Approved');
+      }}));
+    }
+    if (kind === 'new') {
+      actions.push(el('button', {'class':'teams small', text:'👥 Go over together', title:'Move to Need to go over together', onclick: function(){
+        it.together = true; it.togetherAt = Date.now(); save(it); render(); toast('Moved to Need to go over together');
+      }}));
+    } else {
+      actions.push(el('button', {'class':'small', text:'↩ Back', title:'Move back to New links', onclick: function(){
+        it.approved = false; it.approvedAt = 0; it.together = false; it.togetherAt = 0; save(it); render(); toast('Moved back to New links');
+      }}));
+    }
+    actions.push(el('button', {'class':'small', text:'📋 Copy', title:'Copy link only', onclick: function(){ copyPlain(it.url).then(function(){ toast('Link copied'); }); }}));
+    actions.push(el('button', {'class':'small del', text:'🗑', title:'Delete', onclick: function(){
+      if (confirm('Delete this link?\n\n' + it.url)) { it.deleted = true; save(it); render(); }
+    }}));
+
+    var tr = el('tr', {}, [
+      el('td', {'class':'num', text: String(n)}),
+      linkCell(it, true),
+      el('td', {}, [ta]),
+      el('td', {}, [seg([{val:true,label:'Analyzed',cls:'yes'},{val:false,label:'Not analyzed',cls:'no'}], it.analyzed, upd('analyzed'))]),
+      el('td', {}, [seg([{val:true,label:'There is evidence',cls:'yes'},{val:false,label:'No evidence',cls:'no'}], it.evidence, upd('evidence'))]),
+      el('td', {}, [seg([{val:'high',label:'High',cls:'high'},{val:'medium',label:'Medium',cls:'medium'},{val:'low',label:'Low',cls:'low'}], it.confidence, function(v){ it.confidence = (it.confidence === v ? '' : v); save(it); render(); })]),
+      el('td', {}, [el('div', {'class':'actions'}, actions)])
+    ]);
+    return tr;
+  }
+
+  function matches(it, search, fa, fe){
+    if (fa && (fa === 'yes') !== !!it.analyzed) return false;
+    if (fe && (fe === 'yes') !== !!it.evidence) return false;
+    if (search) { var s = search.toLowerCase(); if ((it.url + ' ' + (it.comment||'')).toLowerCase().indexOf(s) < 0) return false; }
+    return true;
+  }
+
+  function render(){
+    var active = document.activeElement, keepFocus = active && active.tagName === 'TEXTAREA' ? active.closest('tr') : null;
+    if (keepFocus) return; // don't redraw while typing a comment
+    var all = live();
+    var t1 = all.filter(function(i){ return where(i) === 'new'; });
+    var t2 = all.filter(function(i){ return where(i) === 'approved'; }).sort(function(a,b){ return b.approvedAt - a.approvedAt; });
+    var t3 = all.filter(function(i){ return where(i) === 'together'; }).sort(function(a,b){ return (b.togetherAt||0) - (a.togetherAt||0); });
+    $('count1').textContent = t1.length; $('count2').textContent = t2.length; $('count3').textContent = t3.length;
+
+    var f1 = t1.filter(function(i){ return matches(i, $('f1Search').value, $('f1Analyzed').value, $('f1Evidence').value); });
+    var f2 = t2.filter(function(i){ return matches(i, $('f2Search').value); });
+    var f3 = t3.filter(function(i){ return matches(i, $('f3Search').value); });
+
+    fill($('tbody1'), f1, 'new', t1.length ? 'No links match the filter' : 'No links yet — paste one above (Ctrl+V)');
+    fill($('tbody2'), f2, 'approved', t2.length ? 'No links match the search' : 'Nothing approved yet');
+    fill($('tbody3'), f3, 'together', t3.length ? 'No links match the search' : 'Nothing to go over together');
+  }
+  function fill(tbody, list, kind, emptyMsg){
+    tbody.innerHTML = '';
+    if (!list.length) { tbody.appendChild(el('tr', {}, [el('td', {colspan:'7', 'class':'empty', text: emptyMsg})])); return; }
+    list.forEach(function(it, i){ tbody.appendChild(row(it, i+1, kind)); });
+  }
+
+  // ---------- export / backup ----------
+  function download(name, content, type){
+    var a = el('a', {href: URL.createObjectURL(new Blob([content], {type: type})), download: name});
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function csvCell(v){ v = v == null ? '' : String(v); return '"' + v.replace(/"/g, '""') + '"'; }
+  function exportCsv(){
+    var names = {'new':'New links', approved:'Approved', together:'Need to go over together'};
+    var rows = [['Table','Link','Comment','Analysis','Evidence','Confidence','Added','Approved']];
+    live().forEach(function(it){
+      rows.push([names[where(it)], it.url, it.comment, it.analyzed ? 'Analyzed' : 'Not analyzed',
+        it.evidence ? 'There is evidence' : 'No evidence', it.confidence ? cap(it.confidence) : '', fmtDate(it.added), fmtDate(it.approvedAt)]);
+    });
+    download('LC-links-' + new Date().toISOString().slice(0,10) + '.csv', '﻿' + rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n'), 'text/csv;charset=utf-8');
+  }
+
+  // ---------- events ----------
+  function wire(){
+    $('btnAdd').addEventListener('click', function(){ if (addLinks($('newLink').value)) $('newLink').value = ''; });
+    $('newLink').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); $('btnAdd').click(); } });
+
+    // Ctrl+V anywhere on the page (not inside a text field)
+    document.addEventListener('paste', function(e){
+      var t = e.target;
+      if (t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.id !== 'newLink'))) return;
+      if (t && t.id === 'newLink') return; // the input handles its own paste + Enter
+      var cd = e.clipboardData; if (!cd) return;
+      var text = cd.getData('text/plain') || '';
+      var html = cd.getData('text/html') || '';
+      var hrefs = []; html.replace(/href\s*=\s*"(https?:[^"]+)"/gi, function(_, u){ hrefs.push(u.replace(/&amp;/g,'&')); });
+      e.preventDefault();
+      addLinks(text + '\n' + hrefs.join('\n'));
+    });
+
+    // drag & drop
+    var box = $('addbox');
+    ['dragenter','dragover'].forEach(function(ev){ document.addEventListener(ev, function(e){ e.preventDefault(); box.classList.add('drag'); }); });
+    ['dragleave','drop'].forEach(function(ev){ document.addEventListener(ev, function(e){ if (ev === 'dragleave' && e.relatedTarget) return; box.classList.remove('drag'); }); });
+    document.addEventListener('drop', function(e){
+      e.preventDefault();
+      var dt = e.dataTransfer; if (!dt) return;
+      addLinks((dt.getData('text/uri-list') || '') + '\n' + (dt.getData('text/plain') || ''));
+    });
+
+    ['f1Search','f2Search','f3Search'].forEach(function(id){ $(id).addEventListener('input', render); });
+    ['f1Analyzed','f1Evidence'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+    $('btnExport').addEventListener('click', exportCsv);
+    $('btnBackup').addEventListener('click', function(){ download('LC-links-backup-' + new Date().toISOString().slice(0,10) + '.json', JSON.stringify({ items: live() }, null, 2), 'application/json'); });
+    $('btnRestore').addEventListener('click', function(){ $('fileRestore').click(); });
+    $('fileRestore').addEventListener('change', function(){
+      var f = this.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function(){
+        try { var s = JSON.parse(r.result); if (!s || !Array.isArray(s.items)) throw 0;
+          if (!confirm('Replace the current list with the backup (' + s.items.length + ' links)?' + (fileHandle ? '\nThis also changes the shared list for everyone.' : ''))) return;
+          var now = Date.now(), keep = {};
+          s.items.forEach(function(it){ it.updated = now; it.deleted = false; keep[it.id] = 1; });
+          state.items.forEach(function(it){ if (!keep[it.id]) { it.deleted = true; it.updated = now; s.items.push(it); } });
+          state.items = s.items; save(); render(); toast('✔ Backup loaded');
+        } catch(e) { toast('✖ Not a valid backup file'); }
+      };
+      r.readAsText(f); this.value = '';
+    });
+
+    // shared file
+    $('btnOpenShared').addEventListener('click', openShared);
+    $('btnCreateShared').addEventListener('click', createShared);
+    // btnReconnect: the page-wide first-click handler does the connecting
+    $('btnOtherFile').addEventListener('click', function(){ pendingHandle = null; showSync(); });
+    $('syncPill').addEventListener('click', function(){
+      if (fileHandle && syncError) { connectSaved(true); return; }
+      if (!fileHandle && !pendingHandle) { connectSaved(true).then(function(ok){ if (!ok) $('banner').scrollIntoView({behavior:'smooth'}); }); }
+    });
+    $('btnChangeFile').addEventListener('click', function(){ $('banner').hidden = false; $('banner').scrollIntoView({behavior:'smooth'}); });
+    document.addEventListener('visibilitychange', function(){ if (!document.hidden) syncNow(); });
+    // the other person's changes arrive through OneDrive; check the file every 4 seconds
+    setInterval(function(){ if (!document.hidden && fileHandle) syncNow(); }, 4000);
+  }
+
+  load(); wire(); render(); showSync();
+  if (!window.showOpenFilePicker) {
+    $('bannerText').textContent = 'Sharing needs Google Chrome or Microsoft Edge on a computer. Your links are saved only on this computer.';
+    $('btnOpenShared').hidden = $('btnCreateShared').hidden = true;
+  } else {
+    connectSaved(false).catch(function(){});
+  }
+  window.__lcReady = true;
+  window.__lcMerge = merge;
+})();
+</script>
+</body>
+</html>
